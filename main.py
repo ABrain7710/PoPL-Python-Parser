@@ -10,9 +10,9 @@ def main(argv):
         program = InputStream(sys.stdin.readline())
 
     lexer = pythonLexer(program)
-    tokens = antlr4.CommonTokenStream(lexer)
-    parser = antlr4.pythonParser(tokens)
-    tree = parser.prog()
+    tokens = CommonTokenStream(lexer)
+    parser = pythonParser(tokens)
+    tree = parser.parse()
     print(tree.toStringTree(recog=parser))
 
 
