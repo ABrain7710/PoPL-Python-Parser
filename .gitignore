@@ -1,1 +1,6 @@
 __pycache__/
+*.interp
+*.tokens
+*Lexer.py
+*Listener.py
+*Parser.py
