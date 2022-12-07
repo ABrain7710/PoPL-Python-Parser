@@ -5,7 +5,7 @@
  */
 grammar python;
 
-parse : line* EOF ;
+parse : line+ ;
 
 line
  : basic_line
@@ -13,16 +13,18 @@ line
  ;
 
 basic_line
- : assignment NEWLINE
- | call NEWLINE
- | return_def NEWLINE
- | PASS NEWLINE
+ : assignment (NEWLINE | EOF)
+ | call (NEWLINE | EOF)
+ | return_def (NEWLINE | EOF)
+ | PASS (NEWLINE | EOF)
  | NEWLINE
  ;
 
 assignment
  : IDENTIFIER ASSIGN expression
- | IDENTIFIER EQUALS expression
+ | IDENTIFIER EQUALS conditional
+ | indexed EQUALS conditional
+ | indexed ASSIGN expression
  ;
 
 expression
@@ -63,12 +65,14 @@ atom
  | dict_def
  | set_def
  | call
- | IDENTIFIER '[' expression ']'
+ | indexed
  ;
 
-list_def : '[' (atom (',' atom)*)? ']' ;
+indexed : IDENTIFIER (OPEN_BRACK expression CLOSE_BRACK)+ ;
 
-tuple_def : '(' (atom (',' atom)*)? ')' ;
+list_def : OPEN_BRACK (atom (',' atom)*)? CLOSE_BRACK ;
+
+tuple_def : OPEN_PAREN (atom (',' atom)*)? CLOSE_PAREN ;
 
 dict_def : '{' (atom ':' atom (',' atom ':' atom)*)? '}' ;
 
@@ -107,7 +111,7 @@ if_statement : IF conditional COLON NEWLINE ;
 
 elif_statement : ELIF conditional COLON NEWLINE ;
 
-else_statement : ELSE conditional COLON NEWLINE ;
+else_statement : ELSE COLON NEWLINE ;
 
 
 // function call
@@ -139,7 +143,7 @@ function
  | DEF IDENTIFIER OPEN_PAREN CLOSE_PAREN ':' NEWLINE
  ;
 
-return_def : RETURN expression;
+return_def : RETURN conditional?;
 
 call
  : IDENTIFIER OPEN_PAREN positional_args ',' keyword_args CLOSE_PAREN
@@ -149,16 +153,16 @@ call
  ;
 
 positional_args
- : (expression (',' expression)*)
+ : (conditional (',' conditional)*)
  ;
 
 keyword_args
- : (IDENTIFIER EQUALS expression (',' IDENTIFIER EQUALS expression)*)
+ : (IDENTIFIER EQUALS conditional (',' IDENTIFIER EQUALS conditional)*)
  ;
 
 default_args
- : IDENTIFIER EQUALS atom ',' default_args
- | IDENTIFIER EQUALS atom
+ : IDENTIFIER EQUALS conditional ',' default_args
+ | IDENTIFIER EQUALS conditional
  ;
 
 non_default_args
@@ -173,7 +177,7 @@ COMPARE
  | '>='
  | '<'
  | '>'
- | IS
+ | 'is'
  ;
 
 LOGIC
@@ -184,18 +188,18 @@ LOGIC
 NEGATE : 'not';
 
 ASSIGN
- : '+' EQUALS
- | '-' EQUALS
- | '*' EQUALS
- | '/' EQUALS
- | '%' EQUALS
- | '//' EQUALS
- | '**' EQUALS
- | '&' EQUALS
- | '|' EQUALS
- | '^' EQUALS
- | '>>' EQUALS
- | '<<' EQUALS
+ : '+='
+ | '-='
+ | '*='
+ | '/='
+ | '%='
+ | '//='
+ | '**='
+ | '&='
+ | '|='
+ | '^='
+ | '>>='
+ | '<<='
  ;
 
 EQUALS : '=';
@@ -217,6 +221,9 @@ BITWISE_RS : '>>';
 OPEN_PAREN : '(';
 CLOSE_PAREN : ')';
 
+OPEN_BRACK : '[';
+CLOSE_BRACK : ']';
+
 BOOLEAN
   : TRUE
   | FALSE
@@ -235,8 +242,6 @@ NONE : 'None' ;
 FOR : 'for' ;
 
 IN : 'in' ;
-
-IS : 'is' ;
 
 WHILE : 'while' ;
 
