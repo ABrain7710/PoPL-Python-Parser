@@ -51,4 +51,4 @@ In addition to all of the expected features defined in the 'Parser Project Descr
      `antlr4 -Dlanguage=Python3 python.g4`
 4. Run the python file with the name of the test file as a commmand line argument
    
-      Example: `python3 main.py tests/general_test.py`
+      Example: `python3 main.py test.py`
